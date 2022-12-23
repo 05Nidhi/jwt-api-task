@@ -3,16 +3,17 @@
 
 # Service to download ftp files from the server
 class UsersController < ApplicationController
-  # skip_before_action :authenticate_user ,only:[:create,:index,:update,:show,:destroy]
-  # before_action :find_user ,only:[:show,:update,:destroy]
+  include JwtWebToken
+
+  before_action :expiration, only: %i[show update destroy]
+
   def index
     @users = User.all
     render json: @users, status: :ok
   end
 
   def show
-    @user = User.find(params[:id])
-    render json: @user, status: :ok
+    render json: { user: @user, message: 'valid token' }, status: 201
   end
 
   def create
@@ -20,35 +21,21 @@ class UsersController < ApplicationController
     if @user.save
       render json: @user, status: :created
     else
-      render json: { errors: @user.errors.full_messages },
-             status: :unprocessable_entity
+      render json: { errors: @user.errors.full_messages }
     end
   end
 
   def update
-    @user = User.find(params[:id])
-
-    message = if @user.update(user_params)
-                'User has been updated.'
-              else
-                'User has not been updated.'
-              end
-    render json: { user: @user, message: message }, status: 201
+    @user.update(user_params)
+    render json: { user: @user, message: 'valid token' }, status: 201
   end
 
   def destroy
-    @user = User.find(params[:id])
     @user.destroy
-    render json: @user, status: 201
+    render json: { user: @user, message: 'valid token' }, status: 201
   end
 
   private
-
-  # def find_user
-  #   @user = User.find_by_username!(params[:_username])
-  #   rescue ActiveRecord::RecordNotFound
-  #     render json: { errors: 'User not found' }, status: :not_found
-  # end
 
   def user_params
     params.permit(:email, :password)

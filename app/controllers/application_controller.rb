@@ -3,21 +3,16 @@
 # require 'jwt_web_token'
 
 class ApplicationController < ActionController::API
-  # include JwtToken
+  # before_action :expiration
 
-  # before_action :authenticate_user
-
-  # private
-  #   def authenticate_user
-  #     header=request.headers['Authorization']
-  #     header=header.split(' ').last if header
-  #     begin
-  #       @decoded =JwtToken.jwt_decode(header)
-  #       @current_user=User.find(@decoded[:user_id])
-  #     rescue ActiveRecord::RecordNotFound => e
-  #       render json: {erors:e.message},status: :unauthorized
-  #     rescue JWT::DecodeError => e
-  #       render json: {erors:e.message},status: :unauthorized
-  #     end
-  #   end
+  private
+  def expiration
+    begin
+      user_id = JwtWebToken.jwt_decode(params[:token])['id']
+      user=User.find(user_id)
+      render json: {user:user,message:"Valid Token"}
+    rescue JWT::ExpiredSignature
+      render json: { error: 'Token has expired' }
+    end
+  end
 end
