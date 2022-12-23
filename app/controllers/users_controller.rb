@@ -1,5 +1,10 @@
-class UsersController < ApplicationController
+# This shiny device polishes bared foos
+# frozen_string_literal: true
 
+# Service to download ftp files from the server
+class UsersController < ApplicationController
+  # skip_before_action :authenticate_user ,only:[:create,:index,:update,:show,:destroy]
+  # before_action :find_user ,only:[:show,:update,:destroy]
   def index
     @users = User.all
     render json: @users, status: :ok
@@ -23,21 +28,22 @@ class UsersController < ApplicationController
   def update
     @user = User.find(params[:id])
 
-    if @user.update(user_params)
-      message = "User has been updated."
-    else
-      message = "User has not been updated."
-    end
-    render json: { user: @user, message: message }, status:201
+    message = if @user.update(user_params)
+                'User has been updated.'
+              else
+                'User has not been updated.'
+              end
+    render json: { user: @user, message: message }, status: 201
   end
 
   def destroy
     @user = User.find(params[:id])
     @user.destroy
-    render json: @user, status:201
+    render json: @user, status: 201
   end
 
   private
+
   # def find_user
   #   @user = User.find_by_username!(params[:_username])
   #   rescue ActiveRecord::RecordNotFound
@@ -45,7 +51,6 @@ class UsersController < ApplicationController
   # end
 
   def user_params
-    params.permit(:email, :password
-    )
+    params.permit(:email, :password)
   end
 end
